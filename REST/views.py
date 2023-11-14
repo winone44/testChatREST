@@ -9,7 +9,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from REST.models import MyUser, Friend, Message
+from REST.models import MyUser, Friend, Message, Group
 from REST.serializers import PasswordChangeSerializer, RegistrationSerializer, PersonSerializer, ShowFriendSerializer, \
     UpdateFriendSerializer, MessageSerializer, UpdateMessagesSerializer, UserWithDistanceSerializer
 from REST.utils import get_tokens_for_user
@@ -185,3 +185,15 @@ def list_users_with_distance(request, user_id):
         serialized_users.append(user_data)
 
     return Response(serialized_users)
+
+
+class UsersInGroup(APIView):
+    def get(self, request, group_id):
+        try:
+            group = Group.objects.get(pk=group_id)
+        except Group.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        users = group.users.all()
+        serializer = PersonSerializer(users, many=True)
+        return Response(serializer.data)

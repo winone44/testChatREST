@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from REST.models import Message, Friend, MyUser
+from REST.models import Message, Friend, MyUser, Group
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
@@ -36,14 +36,21 @@ class PasswordChangeSerializer(serializers.Serializer):
         return value
 
 
+class GroupSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Group
+        fields = ('id', 'name', 'logo_url', 'group_site_url')
+
+
 class PersonSerializer(serializers.ModelSerializer):
+    groups = GroupSerializer(many=True, read_only=True)
     number_of_following = serializers.SerializerMethodField()
     number_of_followers = serializers.SerializerMethodField()
 
     class Meta:
         model = MyUser
         fields = ('id', 'firstName', 'lastName', 'username', 'email', 'age', 'profile_picture', 'gender', 'latitude',
-                  'longitude', 'number_of_following', 'number_of_followers', 'description')
+                  'longitude', 'number_of_following', 'number_of_followers', 'description','groups')
 
     def get_number_of_following(self, obj):  # Metoda dostaje pojedynczy obiekt który jest serializowany (prefix get_)
         return obj.person.all().count()
@@ -82,6 +89,7 @@ class UpdateMessagesSerializer(serializers.ModelSerializer):
 
 
 class UserWithDistanceSerializer(serializers.ModelSerializer):
+    groups = GroupSerializer(many=True, read_only=True)
     number_of_following = serializers.SerializerMethodField()
     number_of_followers = serializers.SerializerMethodField()
     distance = serializers.FloatField(required=False)
@@ -89,7 +97,7 @@ class UserWithDistanceSerializer(serializers.ModelSerializer):
     class Meta:
         model = MyUser
         fields = ('id', 'firstName', 'lastName', 'username', 'email', 'age', 'profile_picture', 'gender', 'latitude',
-                  'longitude', 'number_of_following', 'number_of_followers', 'description', 'distance')
+                  'longitude', 'number_of_following', 'number_of_followers', 'description', 'distance','groups')
 
     def get_number_of_following(self, obj):  # Metoda dostaje pojedynczy obiekt który jest serializowany (prefix get_)
         return obj.person.all().count()

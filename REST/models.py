@@ -4,6 +4,15 @@ from django.contrib.auth.base_user import BaseUserManager, AbstractBaseUser
 from django.db import models
 
 
+class Group(models.Model):
+    name = models.CharField(max_length=100)
+    logo_url = models.CharField(max_length=255)
+    group_site_url = models.URLField(default='')
+
+    def __str__(self):
+        return self.name
+
+
 class MyUserManager(BaseUserManager):
     def create_user(self, email, password=None):
         """
@@ -23,7 +32,6 @@ class MyUserManager(BaseUserManager):
 
 
 class MyUser(AbstractBaseUser):
-
     class sexType(models.TextChoices):
         MALE = 'M', _('Mężczyzna')
         FEMALE = 'F', _('Kobieta')
@@ -41,6 +49,7 @@ class MyUser(AbstractBaseUser):
     latitude = models.FloatField(default=55)
     longitude = models.FloatField(default=55)
     description = models.TextField(blank=True)
+    groups = models.ManyToManyField(Group, related_name='users')
     objects = MyUserManager()
 
     USERNAME_FIELD = 'email'
@@ -48,7 +57,7 @@ class MyUser(AbstractBaseUser):
     def age(self):
         today = date.today()
         return today.year - self.date_of_birth.year - (
-                    (today.month, today.day) < (self.date_of_birth.month, self.date_of_birth.day))
+                (today.month, today.day) < (self.date_of_birth.month, self.date_of_birth.day))
 
     def __str__(self):
         return self.email

@@ -1,4 +1,6 @@
 from datetime import date
+
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.base_user import BaseUserManager, AbstractBaseUser
 from django.db import models
@@ -51,8 +53,13 @@ class MyUser(AbstractBaseUser):
     description = models.TextField(blank=True)
     groups = models.ManyToManyField(Group, related_name='users')
     objects = MyUserManager()
+    last_activity = models.DateTimeField(auto_now_add=True)
 
     USERNAME_FIELD = 'email'
+
+    def update_last_activity(self):
+        self.last_activity = timezone.now()
+        self.save()
 
     def age(self):
         today = date.today()

@@ -55,6 +55,8 @@ MIDDLEWARE = [
 
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
+
+    "REST.middleware.LastActivityMiddleware"
 ]
 
 ROOT_URLCONF = 'testChatREST.urls'

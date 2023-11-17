@@ -1,8 +1,10 @@
+from datetime import timedelta
 from math import radians, sin, cos, atan2, sqrt, floor
 
 from django.contrib.auth import login, authenticate, logout
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -78,10 +80,16 @@ class PersonInfo(APIView):
     def get(self, request, person_id):
         try:
             person = MyUser.objects.get(pk=person_id)
+            user_data = PersonSerializer(person).data
+            if timezone.now() - person.last_activity > timedelta(minutes=1):
+                user_data['online'] = False
+            else:
+                user_data['online'] = True
+
         except MyUser.DoesNotExist:
             return Response(status=404)
-        serializer = PersonSerializer(person)
-        return Response(serializer.data)
+        
+        return Response(user_data)
 
     def patch(self, request, person_id, format=None):
         my_model = MyUser.objects.get(pk=person_id)
@@ -182,6 +190,12 @@ def list_users_with_distance(request, user_id):
         distance = haversine_distance(base_user.latitude, base_user.longitude, user.latitude, user.longitude)
         user_data = UserWithDistanceSerializer(user).data
         user_data['distance'] = distance
+
+        if timezone.now() - user.last_activity > timedelta(minutes=1):
+            user_data['online'] = False
+        else:
+            user_data['online'] = True
+
         serialized_users.append(user_data)
 
     return Response(serialized_users)
@@ -197,3 +211,15 @@ class UsersInGroup(APIView):
         users = group.users.all()
         serializer = PersonSerializer(users, many=True)
         return Response(serializer.data)
+
+
+@api_view(['GET'])
+def check_user_activity(request, user_id):
+    try:
+        user = MyUser.objects.get(pk=user_id)
+        if timezone.now() - user.last_activity > timedelta(minutes=1):
+            return Response({'status': 'Nieaktywny'}, status=status.HTTP_200_OK)
+        else:
+            return Response({'status': 'Aktywny'}, status=status.HTTP_200_OK)
+    except MyUser.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)

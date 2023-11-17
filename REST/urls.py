@@ -2,7 +2,7 @@ from django.urls import path
 from rest_framework_simplejwt import views as jwt_views
 
 from REST.views import LoginView, LogoutView, ChangePasswordView, RegistrationView, FriendList, PersonList, PersonInfo, \
-    MessageListCreateView, calculate_distance, list_users_with_distance, UsersInGroup
+    MessageListCreateView, calculate_distance, list_users_with_distance, UsersInGroup, check_user_activity
 
 urlpatterns = [
     path('accounts/register', RegistrationView.as_view(), name='register'),
@@ -18,5 +18,6 @@ urlpatterns = [
     path('messages/', MessageListCreateView.as_view(), name='message-list-create'),
     path('distance/<int:user1_id>/<int:user2_id>/', calculate_distance, name='calculate_distance'),
     path('list_users_with_distance/<int:user_id>/', list_users_with_distance, name='list_users_with_distance'),
+    path('check_user_activity/<int:user_id>/', check_user_activity, name='check_user_activity'),
     path('groups/<int:group_id>/users/', UsersInGroup.as_view(), name='users-in-group'),
 ]

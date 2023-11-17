@@ -93,11 +93,13 @@ class UserWithDistanceSerializer(serializers.ModelSerializer):
     number_of_following = serializers.SerializerMethodField()
     number_of_followers = serializers.SerializerMethodField()
     distance = serializers.FloatField(required=False)
+    online = serializers.BooleanField(required=False)
 
     class Meta:
         model = MyUser
         fields = ('id', 'firstName', 'lastName', 'username', 'email', 'age', 'profile_picture', 'gender', 'latitude',
-                  'longitude', 'number_of_following', 'number_of_followers', 'description', 'distance','groups')
+                  'longitude', 'number_of_following', 'number_of_followers', 'description', 'distance', 'online',
+                  'groups')
 
     def get_number_of_following(self, obj):  # Metoda dostaje pojedynczy obiekt który jest serializowany (prefix get_)
         return obj.person.all().count()

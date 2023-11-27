@@ -1,5 +1,6 @@
 from datetime import date
 
+from django.contrib.auth.hashers import make_password, check_password
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.base_user import BaseUserManager, AbstractBaseUser
@@ -10,9 +11,17 @@ class Group(models.Model):
     name = models.CharField(max_length=100)
     logo_url = models.CharField(max_length=255)
     group_site_url = models.URLField(default='')
+    password = models.CharField(max_length=255)
 
     def __str__(self):
         return self.name
+
+    def save(self, *args, **kwargs):
+        self.password = make_password(self.password)
+        super().save(*args, **kwargs)
+
+    def check_password(self, raw_password):
+        return check_password(raw_password, self.password)
 
 
 class MyUserManager(BaseUserManager):

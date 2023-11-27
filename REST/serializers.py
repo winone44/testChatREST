@@ -39,7 +39,10 @@ class PasswordChangeSerializer(serializers.Serializer):
 class GroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
-        fields = ('id', 'name', 'logo_url', 'group_site_url')
+        fields = ('id', 'name', 'logo_url', 'group_site_url', 'password')
+        extra_kwargs = {
+            'password': {'write_only': True}
+        }
 
 
 class PersonSerializer(serializers.ModelSerializer):

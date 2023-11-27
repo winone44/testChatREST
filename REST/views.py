@@ -13,7 +13,7 @@ from rest_framework.views import APIView
 
 from REST.models import MyUser, Friend, Message, Group
 from REST.serializers import PasswordChangeSerializer, RegistrationSerializer, PersonSerializer, ShowFriendSerializer, \
-    UpdateFriendSerializer, MessageSerializer, UpdateMessagesSerializer, UserWithDistanceSerializer
+    UpdateFriendSerializer, MessageSerializer, UpdateMessagesSerializer, UserWithDistanceSerializer, GroupSerializer
 from REST.utils import get_tokens_for_user
 
 from testChatREST import settings
@@ -88,7 +88,7 @@ class PersonInfo(APIView):
 
         except MyUser.DoesNotExist:
             return Response(status=404)
-        
+
         return Response(user_data)
 
     def patch(self, request, person_id, format=None):
@@ -223,3 +223,48 @@ def check_user_activity(request, user_id):
             return Response({'status': 'Aktywny'}, status=status.HTTP_200_OK)
     except MyUser.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
+
+
+class GroupCreateView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, format=None):
+        serializer = GroupSerializer(data=request.data)
+        if serializer.is_valid():
+            group = serializer.save()
+            request.user.groups.add(group)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class JoinGroupView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, format=None):
+        group_id = request.data.get('group_id')
+        password = request.data.get('password')
+
+        try:
+            group = Group.objects.get(id=group_id)
+        except Group.DoesNotExist:
+            return Response({'error': 'Group not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        if group.check_password(password):
+            request.user.groups.add(group)
+            return Response({'message': 'User added to group'}, status=status.HTTP_200_OK)
+        else:
+            return Response({'error': 'Incorrect password'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class LeaveGroupView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, format=None):
+        group_id = request.data.get('group_id')
+
+        try:
+            group = Group.objects.get(id=group_id)
+            request.user.groups.remove(group)
+            return Response({'message': 'User removed from group'}, status=status.HTTP_200_OK)
+        except Group.DoesNotExist:
+            return Response({'error': 'Group not found'}, status=status.HTTP_404_NOT_FOUND)

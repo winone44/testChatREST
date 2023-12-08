@@ -259,7 +259,7 @@ class JoinGroupView(APIView):
 class LeaveGroupView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def post(self, request, format=None):
+    def delete(self, request, format=None):
         group_id = request.data.get('group_id')
 
         try:

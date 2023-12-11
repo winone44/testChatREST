@@ -36,6 +36,17 @@ class PasswordChangeSerializer(serializers.Serializer):
         return value
 
 
+class GroupDetailSerializer(serializers.ModelSerializer):
+    user_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Group
+        fields = ('id', 'name', 'logo_url', 'user_count')
+
+    def get_user_count(self, obj):
+        return obj.users.count()
+
+
 class GroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group

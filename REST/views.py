@@ -13,7 +13,8 @@ from rest_framework.views import APIView
 
 from REST.models import MyUser, Friend, Message, Group
 from REST.serializers import PasswordChangeSerializer, RegistrationSerializer, PersonSerializer, ShowFriendSerializer, \
-    UpdateFriendSerializer, MessageSerializer, UpdateMessagesSerializer, UserWithDistanceSerializer, GroupSerializer
+    UpdateFriendSerializer, MessageSerializer, UpdateMessagesSerializer, UserWithDistanceSerializer, GroupSerializer, \
+    GroupDetailSerializer
 from REST.utils import get_tokens_for_user
 
 from testChatREST import settings
@@ -268,3 +269,16 @@ class LeaveGroupView(APIView):
             return Response({'message': 'User removed from group'}, status=status.HTTP_200_OK)
         except Group.DoesNotExist:
             return Response({'error': 'Group not found'}, status=status.HTTP_404_NOT_FOUND)
+
+
+class GroupDetailView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk):
+        try:
+            group = Group.objects.get(pk=pk)
+        except Group.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        serializer = GroupDetailSerializer(group)
+        return Response(serializer.data)

@@ -199,7 +199,9 @@ def list_users_with_distance(request, user_id):
 
         serialized_users.append(user_data)
 
-    return Response(serialized_users)
+    sorted_users = sorted(serialized_users, key=lambda x: x['distance'])
+
+    return Response(sorted_users)
 
 
 class UsersInGroup(APIView):

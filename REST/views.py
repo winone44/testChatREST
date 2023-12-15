@@ -2,6 +2,7 @@ from datetime import timedelta
 from math import radians, sin, cos, atan2, sqrt, floor
 
 from django.contrib.auth import login, authenticate, logout
+from django.db.models import Max, Q
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
@@ -182,9 +183,10 @@ def haversine_distance(lat1, lon1, lat2, lon2):
 
 
 @api_view(['GET'])
-def list_users_with_distance(request, user_id):
-    base_user = get_object_or_404(MyUser, id=user_id)
-    all_users = MyUser.objects.exclude(id=user_id)
+def list_users_with_distance(request):
+    current_user = request.user
+    base_user = get_object_or_404(MyUser, id=current_user.id)
+    all_users = MyUser.objects.exclude(id=current_user.id)
 
     serialized_users = []
     for user in all_users:
@@ -202,6 +204,55 @@ def list_users_with_distance(request, user_id):
     sorted_users = sorted(serialized_users, key=lambda x: x['distance'])
 
     return Response(sorted_users)
+
+
+@api_view(['GET'])
+def list_users_by_recent_message(request):
+    current_user = request.user
+    base_user = get_object_or_404(MyUser, id=current_user.id)
+
+    # Pobranie identyfikatorów użytkowników z ostatnich wysłanych/otrzymanych wiadomości
+    user_ids = Message.objects.filter(
+        Q(sender=current_user) | Q(receiver=current_user)
+    ).order_by('-created_at').values('sender_id', 'receiver_id').distinct()
+
+    # Wyodrębnienie unikalnych identyfikatorów użytkowników
+    unique_user_ids = set()
+    for entry in user_ids:
+        unique_user_ids.add(entry['sender_id'])
+        unique_user_ids.add(entry['receiver_id'])
+    if current_user.id in unique_user_ids:
+        unique_user_ids.remove(current_user.id)
+
+    # Pobranie użytkowników
+    users = MyUser.objects.filter(id__in=unique_user_ids)
+
+    # Sortowanie użytkowników
+    def get_latest_message_date(user):
+        latest_sent_message = user.sent_messages.order_by('created_at').last()
+        latest_received_message = user.received_messages.order_by('created_at').last()
+
+        # Pobranie najnowszej daty z wysłanych i otrzymanych wiadomości
+        dates = [msg.created_at for msg in [latest_sent_message, latest_received_message] if msg]
+        return max(dates) if dates else None
+
+    users = sorted(users, key=get_latest_message_date, reverse=True)
+
+    serialized_users = []
+
+    for user in users:
+        distance = haversine_distance(base_user.latitude, base_user.longitude, user.latitude, user.longitude)
+        user_data = UserWithDistanceSerializer(user).data
+        user_data['distance'] = distance
+
+        if timezone.now() - user.last_activity > timedelta(minutes=1):
+            user_data['online'] = False
+        else:
+            user_data['online'] = True
+
+        serialized_users.append(user_data)
+
+    return Response(serialized_users)
 
 
 class UsersInGroup(APIView):

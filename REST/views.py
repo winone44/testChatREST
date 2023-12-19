@@ -136,10 +136,11 @@ class FriendList(APIView):
 
 
 class MessageListCreateView(APIView):
+    permission_classes = [IsAuthenticated]
     serializer_class = MessageSerializer
 
     def get(self, request):
-        sender = request.query_params.get('sender')
+        sender = request.user.id
         receiver = request.query_params.get('receiver')
         queryset = Message.objects.filter(sender=sender, receiver=receiver).order_by(
             'created_at') | Message.objects.filter(sender=receiver, receiver=sender).order_by('created_at')
@@ -147,7 +148,9 @@ class MessageListCreateView(APIView):
         return Response(serializer.data)
 
     def post(self, request):
-        serializer = UpdateMessagesSerializer(data=request.data)
+        data = request.data.copy()
+        data['sender'] = request.user.id
+        serializer = UpdateMessagesSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)

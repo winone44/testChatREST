@@ -20,6 +20,8 @@ from REST.utils import get_tokens_for_user
 
 from testChatREST import settings
 
+from django.utils.translation import gettext as _
+
 
 class RegistrationView(APIView):
     permission_classes = [AllowAny]
@@ -37,7 +39,7 @@ class LoginView(APIView):
 
     def post(self, request):
         if 'email' not in request.data or 'password' not in request.data:
-            return Response({'msg': 'Credentials missing'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'Credentials missing'}, status=status.HTTP_400_BAD_REQUEST)
         email = request.POST.get('email')
         print('Email:', email)
         password = request.POST.get('password')
@@ -46,18 +48,18 @@ class LoginView(APIView):
         if user is not None:
             login(request, user)
             auth_data = get_tokens_for_user(request.user)
-            return Response({'msg': 'Login Success', 'username': user.username, 'localId': user.id,
+            return Response({'message': _('Login Success'), 'username': user.username, 'localId': user.id,
                              'profile_picture': user.profile_picture,
                              'access_token_lifetime': settings.ACCESS_TOKEN_LIFETIME,
                              'refresh_token_lifetime': settings.REFRESH_TOKEN_LIFETIME, **auth_data},
                             status=status.HTTP_200_OK)
-        return Response({'msg': 'Invalid Credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+        return Response({'error': _('Invalid Credentials')}, status=status.HTTP_401_UNAUTHORIZED)
 
 
 class LogoutView(APIView):
     def post(self, request):
         logout(request)
-        return Response({'msg': 'Successfully Logged out'}, status=status.HTTP_200_OK)
+        return Response({'message': _('Successfully Logged out')}, status=status.HTTP_200_OK)
 
 
 class ChangePasswordView(APIView):
@@ -68,7 +70,7 @@ class ChangePasswordView(APIView):
         serializer.is_valid(raise_exception=True)
         request.user.set_password(serializer.validated_data['new_password'])
         request.user.save()
-        return Response({'msg': 'The password has been changed'}, status=status.HTTP_200_OK)
+        return Response({'message': _('The password has been changed')}, status=status.HTTP_200_OK)
 
 
 class PersonList(APIView):
@@ -304,13 +306,13 @@ class JoinGroupView(APIView):
         try:
             group = Group.objects.get(id=group_id)
         except Group.DoesNotExist:
-            return Response({'error': 'Group not found'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'error': _('Group not found')}, status=status.HTTP_404_NOT_FOUND)
 
         if group.check_password(password):
             request.user.groups.add(group)
-            return Response({'message': 'User added to group'}, status=status.HTTP_200_OK)
+            return Response({'message': _('User added to group')}, status=status.HTTP_200_OK)
         else:
-            return Response({'error': 'Incorrect password'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': _('Incorrect password')}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class LeaveGroupView(APIView):
@@ -322,9 +324,9 @@ class LeaveGroupView(APIView):
         try:
             group = Group.objects.get(id=group_id)
             request.user.groups.remove(group)
-            return Response({'message': 'User removed from group'}, status=status.HTTP_200_OK)
+            return Response({'message': _('User removed from group')}, status=status.HTTP_200_OK)
         except Group.DoesNotExist:
-            return Response({'error': 'Group not found'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'error': _('Group not found')}, status=status.HTTP_404_NOT_FOUND)
 
 
 class GroupDetailView(APIView):

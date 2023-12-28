@@ -31,7 +31,7 @@ class MyUserManager(BaseUserManager):
         urodzenia i hasłem.
         """
         if not email:
-            raise ValueError('Użytkownicy muszą posiadać adres e-mail')
+            raise ValueError('Users must have an e-mail address')
 
         user = self.model(
             email=self.normalize_email(email),
@@ -44,8 +44,8 @@ class MyUserManager(BaseUserManager):
 
 class MyUser(AbstractBaseUser):
     class sexType(models.TextChoices):
-        MALE = 'M', _('Mężczyzna')
-        FEMALE = 'F', _('Kobieta')
+        MALE = 'M', _('Man')
+        FEMALE = 'F', _('Woman')
 
     username = models.CharField(max_length=20, unique=True)
     email = models.EmailField(

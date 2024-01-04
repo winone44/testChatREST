@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-12-28 18:45+0100\n"
+"POT-Creation-Date: 2024-01-04 19:34+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -44,21 +44,29 @@ msgstr "Вы успешно вышли из системы"
 msgid "The password has been changed"
 msgstr "Пароль был изменен"
 
-#: .\REST\views.py:309 .\REST\views.py:329
+#: .\REST\views.py:82
+msgid "The user was successfully deleted"
+msgstr "Пользователь был успешно удален"
+
+#: .\REST\views.py:318 .\REST\views.py:338
 msgid "Group not found"
 msgstr "Группа не найдена"
 
-#: .\REST\views.py:313
+#: .\REST\views.py:322
 msgid "User added to group"
 msgstr "Пользователь добавлен в группу"
 
-#: .\REST\views.py:315
+#: .\REST\views.py:324
 msgid "Incorrect password"
 msgstr "Неверный пароль"
 
-#: .\REST\views.py:327
+#: .\REST\views.py:336
 msgid "User removed from group"
 msgstr "Пользователь удален из группы"
+
+#: .\venv\Lib\site-packages\django\contrib\messages\apps.py:15
+msgid "Messages"
+msgstr ""
 
 #: .\venv\Lib\site-packages\django\contrib\sitemaps\apps.py:8
 msgid "Site Maps"

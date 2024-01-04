@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-12-28 18:35+0100\n"
+"POT-Creation-Date: 2024-01-04 19:33+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -44,19 +44,23 @@ msgstr "Wylogowano"
 msgid "The password has been changed"
 msgstr "Hasło zostało zmienione"
 
-#: .\REST\views.py:309 .\REST\views.py:329
+#: .\REST\views.py:82
+msgid "The user was successfully deleted"
+msgstr "Użytkownik został pomyślnie usunięty"
+
+#: .\REST\views.py:318 .\REST\views.py:338
 msgid "Group not found"
 msgstr "Nie znaleziono grupy"
 
-#: .\REST\views.py:313
+#: .\REST\views.py:322
 msgid "User added to group"
 msgstr "Użytkownik dodany do grupy"
 
-#: .\REST\views.py:315
+#: .\REST\views.py:324
 msgid "Incorrect password"
 msgstr "Nieprawidłowe hasło"
 
-#: .\REST\views.py:327
+#: .\REST\views.py:336
 msgid "User removed from group"
 msgstr "Użytkownik usunięty z grupy!"
 

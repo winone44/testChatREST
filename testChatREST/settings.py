@@ -23,7 +23,7 @@ SECRET_KEY = 'django-insecure-$ycbudf*jp_unq0=!$rzzk9o%add#&gk@%kf&74#(-7j=s83zf
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
+# ALLOWED_HOSTS = ['pksimpleweb.pythonanywhere.com']
 ALLOWED_HOSTS = ['192.168.0.182', '192.168.1.26', '127.0.0.1']
 ACCESS_TOKEN_LIFETIME = timedelta(minutes=5)
 REFRESH_TOKEN_LIFETIME = timedelta(days=1)

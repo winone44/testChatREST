@@ -63,8 +63,9 @@ class PersonSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = MyUser
-        fields = ('id', 'firstName', 'lastName', 'username', 'email', 'age', 'profile_picture', 'gender', 'latitude',
-                  'longitude', 'number_of_following', 'number_of_followers', 'description','groups')
+        fields = ('id', 'firstName', 'lastName', 'username', 'email', 'age', 'date_of_birth', 'profile_picture',
+                  'gender', 'latitude', 'longitude', 'number_of_following', 'number_of_followers', 'description',
+                  'groups')
 
     def get_number_of_following(self, obj):  # Metoda dostaje pojedynczy obiekt który jest serializowany (prefix get_)
         return obj.person.all().count()

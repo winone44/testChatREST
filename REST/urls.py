@@ -3,7 +3,7 @@ from rest_framework_simplejwt import views as jwt_views
 
 from REST.views import LoginView, LogoutView, ChangePasswordView, RegistrationView, FriendList, PersonList, PersonInfo, \
     MessageListCreateView, calculate_distance, list_users_with_distance, UsersInGroup, check_user_activity, \
-    GroupCreateView, JoinGroupView, LeaveGroupView, GroupDetailView, list_users_by_recent_message
+    GroupCreateView, JoinGroupView, LeaveGroupView, GroupDetailView, list_users_by_recent_message, DeleteCurrentUserView
 
 urlpatterns = [
     path('accounts/register', RegistrationView.as_view(), name='register'),
@@ -16,6 +16,7 @@ urlpatterns = [
     path('accounts/person/', PersonList.as_view(), name='person-list'),
     path('accounts/person/<int:person_id>/', PersonInfo.as_view(), name='person-info'),
     path('accounts/person/<int:person_id>/patch/', PersonInfo.as_view(), name='person-update'),
+    path('accounts/delete-account/', DeleteCurrentUserView.as_view(), name='delete-account'),
     path('messages/', MessageListCreateView.as_view(), name='message-list-create'),
     path('distance/<int:user1_id>/<int:user2_id>/', calculate_distance, name='calculate_distance'),
     path('list_users_with_distance/', list_users_with_distance, name='list_users_with_distance'),

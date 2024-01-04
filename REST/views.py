@@ -73,6 +73,15 @@ class ChangePasswordView(APIView):
         return Response({'message': _('The password has been changed')}, status=status.HTTP_200_OK)
 
 
+class DeleteCurrentUserView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request):
+        user = request.user
+        user.delete()
+        return Response({"message": _("The user was successfully deleted")}, status=status.HTTP_200_OK)
+
+
 class PersonList(APIView):
     def get(self, request):
         person = MyUser.objects.all()

@@ -92,3 +92,15 @@ class Message(models.Model):
 
     def __str__(self):
         return f'{self.sender.username} -> {self.receiver.username}'
+
+
+class Alert(models.Model):
+    title = models.CharField(max_length=100)
+    content = models.TextField()
+    start_date = models.DateTimeField()
+    end_date = models.DateTimeField()
+    group = models.ForeignKey(Group, on_delete=models.CASCADE)
+    style = models.CharField(max_length=50)  # np. primary, secondary itp.
+
+    def __str__(self):
+        return self.title

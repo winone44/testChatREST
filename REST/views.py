@@ -8,14 +8,15 @@ from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.decorators import api_view
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from REST.models import MyUser, Friend, Message, Group
+from REST.models import MyUser, Friend, Message, Group, Alert
 from REST.serializers import PasswordChangeSerializer, RegistrationSerializer, PersonSerializer, ShowFriendSerializer, \
     UpdateFriendSerializer, MessageSerializer, UpdateMessagesSerializer, UserWithDistanceSerializer, GroupSerializer, \
-    GroupDetailSerializer
+    GroupDetailSerializer, AlertSerializer, AlertSerializerSave
 from REST.utils import get_tokens_for_user
 
 from testChatREST import settings
@@ -349,3 +350,50 @@ class GroupDetailView(APIView):
 
         serializer = GroupDetailSerializer(group)
         return Response(serializer.data)
+
+
+class CustomPagination(PageNumberPagination):
+    page_size = 2  # Ustawia liczbę elementów na stronie
+    page_size_query_param = 'page_size'  # Umożliwia klientowi wybór liczby elementów na stronie
+    max_page_size = 100  # Maksymalna dopuszczalna liczba elementów na stronie
+
+    def get_paginated_response(self, data):
+        return Response({
+            'count': self.page.paginator.count,
+            'next': self.page.next_page_number() if self.page.has_next() else None,
+            'previous': self.page.previous_page_number() if self.page.has_previous() else None,
+            'results': data
+        })
+
+
+class AlertListCreateView(APIView):
+    permission_classes = [IsAuthenticated]
+    pagination_class = CustomPagination
+
+    def get(self, request, *args, **kwargs):
+        current_time = timezone.now()
+        user_groups = request.user.groups.all()
+
+        # Filtrowanie komunikatów na podstawie przynależności do grup oraz daty startu i końca
+        alerts = Alert.objects.filter(
+            group__in=user_groups,
+            start_date__lte=current_time,
+            end_date__gte=current_time
+        ).order_by('end_date')
+        paginator = self.pagination_class()
+        page = paginator.paginate_queryset(alerts, request)
+
+        if page is not None:
+            serializer = AlertSerializer(page, many=True)
+            return paginator.get_paginated_response(serializer.data)
+
+        serializer = AlertSerializer(alerts, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, format=None):
+        serializer = AlertSerializerSave(data=request.data)
+        if serializer.is_valid():
+            # Możesz dodać dodatkową logikę, np. sprawdzenie, czy użytkownik należy do grupy
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

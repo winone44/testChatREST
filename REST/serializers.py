@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from REST.models import Message, Friend, MyUser, Group
+from REST.models import Message, Friend, MyUser, Group, Alert
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
@@ -121,3 +121,18 @@ class UserWithDistanceSerializer(serializers.ModelSerializer):
 
     def get_number_of_followers(self, obj):  # Metoda dostaje pojedynczy obiekt który jest serializowany (prefix get_)
         return obj.person_friends.all().count()
+
+
+class AlertSerializer(serializers.ModelSerializer):
+    group = GroupSerializer(read_only=True)
+
+    class Meta:
+        model = Alert
+        fields = ['id', 'title', 'content', 'start_date', 'end_date', 'group', 'style']
+
+
+class AlertSerializerSave(serializers.ModelSerializer):
+
+    class Meta:
+        model = Alert
+        fields = ['id', 'title', 'content', 'start_date', 'end_date', 'group', 'style']

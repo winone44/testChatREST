@@ -104,3 +104,11 @@ class Alert(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class BlockedUsers(models.Model):
+    user = models.ForeignKey(MyUser, on_delete=models.CASCADE, related_name='blocked_by_me')
+    blocked_user = models.ForeignKey(MyUser, on_delete=models.CASCADE, related_name='blocked_me')
+
+    class Meta:
+        unique_together = ('user', 'blocked_user')

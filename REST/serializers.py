@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from REST.models import Message, Friend, MyUser, Group, Alert
+from REST.models import Message, Friend, MyUser, Group, Alert, BlockedUsers
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
@@ -132,7 +132,20 @@ class AlertSerializer(serializers.ModelSerializer):
 
 
 class AlertSerializerSave(serializers.ModelSerializer):
-
     class Meta:
         model = Alert
         fields = ['id', 'title', 'content', 'start_date', 'end_date', 'group', 'style']
+
+
+class BlockedUsersListSerializer(serializers.ModelSerializer):
+    blocked_user = PersonSerializer(read_only=True)
+
+    class Meta:
+        model = BlockedUsers
+        fields = ['id', 'blocked_user']
+
+
+class BlockedUsersSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BlockedUsers
+        fields = '__all__'

@@ -13,10 +13,10 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from REST.models import MyUser, Friend, Message, Group, Alert
+from REST.models import MyUser, Friend, Message, Group, Alert, BlockedUsers
 from REST.serializers import PasswordChangeSerializer, RegistrationSerializer, PersonSerializer, ShowFriendSerializer, \
     UpdateFriendSerializer, MessageSerializer, UpdateMessagesSerializer, UserWithDistanceSerializer, GroupSerializer, \
-    GroupDetailSerializer, AlertSerializer, AlertSerializerSave
+    GroupDetailSerializer, AlertSerializer, AlertSerializerSave, BlockedUsersSerializer, BlockedUsersListSerializer
 from REST.utils import get_tokens_for_user
 
 from testChatREST import settings
@@ -100,6 +100,11 @@ class PersonInfo(APIView):
             else:
                 user_data['online'] = True
 
+            if self.is_blocked(request.user.id, person_id) or self.is_blocked(person_id, request.user.id):
+                user_data['blocked_user'] = True
+            else:
+                user_data['blocked_user'] = False
+
         except MyUser.DoesNotExist:
             return Response(status=404)
 
@@ -112,6 +117,10 @@ class PersonInfo(APIView):
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def is_blocked(self, user_id, blocked_user_id):
+        """Zwraca True jeżeli user_id jest zablokowany przez blocked_user_id """
+        return BlockedUsers.objects.filter(user_id=blocked_user_id, blocked_user_id=user_id).exists()
 
 
 class FriendList(APIView):
@@ -147,6 +156,9 @@ class FriendList(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+from django.core.exceptions import PermissionDenied
+
+
 class MessageListCreateView(APIView):
     permission_classes = [IsAuthenticated]
     serializer_class = MessageSerializer
@@ -154,6 +166,7 @@ class MessageListCreateView(APIView):
     def get(self, request):
         sender = request.user.id
         receiver = request.query_params.get('receiver')
+
         queryset = Message.objects.filter(sender=sender, receiver=receiver).order_by(
             'created_at') | Message.objects.filter(sender=receiver, receiver=sender).order_by('created_at')
         serializer = MessageSerializer(queryset, many=True)
@@ -162,11 +175,21 @@ class MessageListCreateView(APIView):
     def post(self, request):
         data = request.data.copy()
         data['sender'] = request.user.id
+        receiver = data.get('receiver')
+
+        # Sprawdź czy użytkownik jest zablokowany
+        if self.is_blocked(request.user.id, receiver) or self.is_blocked(receiver, request.user.id):
+            raise PermissionDenied("Jesteś zablokowany przez tego użytkownika lub zablokowałeś tego użytkownika")
+
         serializer = UpdateMessagesSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def is_blocked(self, user_id, blocked_user_id):
+        """Zwraca True jeżeli user_id jest zablokowany przez blocked_user_id """
+        return BlockedUsers.objects.filter(user_id=blocked_user_id, blocked_user_id=user_id).exists()
 
 
 def calculate_distance(request, user1_id, user2_id):
@@ -201,7 +224,10 @@ def haversine_distance(lat1, lon1, lat2, lon2):
 def list_users_with_distance(request):
     current_user = request.user
     base_user = get_object_or_404(MyUser, id=current_user.id)
-    all_users = MyUser.objects.exclude(id=current_user.id)
+
+    # Wyklucz użytkowników, którzy zablokowali aktualnego użytkownika
+    blocked_users = BlockedUsers.objects.filter(blocked_user=current_user.id).values_list('user', flat=True)
+    all_users = MyUser.objects.exclude(id=current_user.id).exclude(id__in=blocked_users)
 
     serialized_users = []
     for user in all_users:
@@ -397,3 +423,33 @@ class AlertListCreateView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class BlockedUsersListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        blocked_users = BlockedUsers.objects.filter(user=request.user)
+        serializer = BlockedUsersListSerializer(blocked_users, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        data = request.data.copy()
+        data['user'] = request.user.id
+
+        serializer = BlockedUsersSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, *args, **kwargs):
+        try:
+            user = request.user
+            blocked_user = request.data['blocked_user']
+
+            friend_obj = BlockedUsers.objects.get(user=user, blocked_user=blocked_user)
+            friend_obj.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except:
+            return Response(status=status.HTTP_404_NOT_FOUND)

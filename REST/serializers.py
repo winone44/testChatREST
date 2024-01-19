@@ -125,16 +125,17 @@ class UserWithDistanceSerializer(serializers.ModelSerializer):
 
 class AlertSerializer(serializers.ModelSerializer):
     group = GroupSerializer(read_only=True)
+    user = PersonSerializer(read_only=True)
 
     class Meta:
         model = Alert
-        fields = ['id', 'title', 'content', 'start_date', 'end_date', 'group', 'style']
+        fields = ['id', 'user', 'title', 'content', 'start_date', 'end_date', 'group', 'style']
 
 
 class AlertSerializerSave(serializers.ModelSerializer):
     class Meta:
         model = Alert
-        fields = ['id', 'title', 'content', 'start_date', 'end_date', 'group', 'style']
+        fields = ['id', 'user', 'title', 'content', 'start_date', 'end_date', 'group', 'style']
 
 
 class BlockedUsersListSerializer(serializers.ModelSerializer):

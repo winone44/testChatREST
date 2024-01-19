@@ -4,7 +4,7 @@ from rest_framework_simplejwt import views as jwt_views
 from REST.views import LoginView, LogoutView, ChangePasswordView, RegistrationView, FriendList, PersonList, PersonInfo, \
     MessageListCreateView, calculate_distance, list_users_with_distance, UsersInGroup, check_user_activity, \
     GroupCreateView, JoinGroupView, LeaveGroupView, GroupDetailView, list_users_by_recent_message, \
-    DeleteCurrentUserView, AlertListCreateView, BlockedUsersListView
+    DeleteCurrentUserView, AlertListCreateView, BlockedUsersListView, UserAlertsListDeleteView
 
 urlpatterns = [
     path('accounts/register', RegistrationView.as_view(), name='register'),
@@ -26,8 +26,9 @@ urlpatterns = [
     path('check_user_activity/<int:user_id>/', check_user_activity, name='check_user_activity'),
     path('groups/<int:group_id>/users/', UsersInGroup.as_view(), name='users-in-group'),
     path('groups/<int:pk>/', GroupDetailView.as_view(), name='group-detail'),
-    path('group/create/', GroupCreateView.as_view(), name='group-create-view'),
-    path('group/join/', JoinGroupView.as_view(), name='join-group-view'),
-    path('group/leave/', LeaveGroupView.as_view(), name='leave-group-view'),
-    path('groups/alerts/', AlertListCreateView.as_view(), name='alert-list-create-view'),
+    path('group/create/', GroupCreateView.as_view(), name='group-create'),
+    path('group/join/', JoinGroupView.as_view(), name='join-group'),
+    path('group/leave/', LeaveGroupView.as_view(), name='leave-group'),
+    path('groups/alerts/', AlertListCreateView.as_view(), name='alert-list-create'),
+    path('accounts/alerts/', UserAlertsListDeleteView.as_view(), name='user-alerts-list-delete'),
 ]

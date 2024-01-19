@@ -417,12 +417,40 @@ class AlertListCreateView(APIView):
         return Response(serializer.data)
 
     def post(self, request, format=None):
-        serializer = AlertSerializerSave(data=request.data)
+        data = request.data.copy()
+        data['user'] = request.user.id
+
+        serializer = AlertSerializerSave(data=data)
         if serializer.is_valid():
             # Możesz dodać dodatkową logikę, np. sprawdzenie, czy użytkownik należy do grupy
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserAlertsListDeleteView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        user_id = request.user.id
+
+        alerts = Alert.objects.filter(
+            Q(user=user_id)
+        ).order_by('end_date')
+
+        serializer = AlertSerializer(alerts, many=True)
+        return Response(serializer.data)
+
+    def delete(self, request, *args, **kwargs):
+        try:
+            user = request.user
+            alert_id = request.data['id']
+
+            alert_obj = Alert.objects.get(user=user, id=alert_id)
+            alert_obj.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except:
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
 
 class BlockedUsersListView(APIView):
@@ -448,8 +476,8 @@ class BlockedUsersListView(APIView):
             user = request.user
             blocked_user = request.data['blocked_user']
 
-            friend_obj = BlockedUsers.objects.get(user=user, blocked_user=blocked_user)
-            friend_obj.delete()
+            blocked_user_obj = BlockedUsers.objects.get(user=user, blocked_user=blocked_user)
+            blocked_user_obj.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         except:
             return Response(status=status.HTTP_404_NOT_FOUND)

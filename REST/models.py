@@ -95,6 +95,7 @@ class Message(models.Model):
 
 
 class Alert(models.Model):
+    user = models.ForeignKey(MyUser, on_delete=models.CASCADE, related_name='alert_by_me')
     title = models.CharField(max_length=100)
     content = models.TextField()
     start_date = models.DateTimeField()

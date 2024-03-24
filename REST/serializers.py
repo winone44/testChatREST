@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from REST.models import Message, Friend, MyUser, Group, Alert, BlockedUsers
+from REST.models import Message, MyUser, Group, Alert, BlockedUsers
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
@@ -58,34 +58,12 @@ class GroupSerializer(serializers.ModelSerializer):
 
 class PersonSerializer(serializers.ModelSerializer):
     groups = GroupSerializer(many=True, read_only=True)
-    number_of_following = serializers.SerializerMethodField()
-    number_of_followers = serializers.SerializerMethodField()
 
     class Meta:
         model = MyUser
         fields = ('id', 'firstName', 'lastName', 'username', 'email', 'age', 'date_of_birth', 'profile_picture',
-                  'gender', 'latitude', 'longitude', 'number_of_following', 'number_of_followers', 'description',
+                  'gender', 'latitude', 'longitude', 'description',
                   'groups')
-
-    def get_number_of_following(self, obj):  # Metoda dostaje pojedynczy obiekt który jest serializowany (prefix get_)
-        return obj.person.all().count()
-
-    def get_number_of_followers(self, obj):  # Metoda dostaje pojedynczy obiekt który jest serializowany (prefix get_)
-        return obj.person_friends.all().count()
-
-
-class UpdateFriendSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Friend
-        fields = '__all__'
-
-
-class ShowFriendSerializer(serializers.ModelSerializer):
-    friend = PersonSerializer()
-
-    class Meta:
-        model = Friend
-        fields = ('friend',)
 
 
 class MessageSerializer(serializers.ModelSerializer):
@@ -105,22 +83,14 @@ class UpdateMessagesSerializer(serializers.ModelSerializer):
 
 class UserWithDistanceSerializer(serializers.ModelSerializer):
     groups = GroupSerializer(many=True, read_only=True)
-    number_of_following = serializers.SerializerMethodField()
-    number_of_followers = serializers.SerializerMethodField()
     distance = serializers.FloatField(required=False)
     online = serializers.BooleanField(required=False)
 
     class Meta:
         model = MyUser
         fields = ('id', 'firstName', 'lastName', 'username', 'email', 'age', 'profile_picture', 'gender', 'latitude',
-                  'longitude', 'number_of_following', 'number_of_followers', 'description', 'distance', 'online',
+                  'longitude', 'description', 'distance', 'online',
                   'groups')
-
-    def get_number_of_following(self, obj):  # Metoda dostaje pojedynczy obiekt który jest serializowany (prefix get_)
-        return obj.person.all().count()
-
-    def get_number_of_followers(self, obj):  # Metoda dostaje pojedynczy obiekt który jest serializowany (prefix get_)
-        return obj.person_friends.all().count()
 
 
 class AlertSerializer(serializers.ModelSerializer):

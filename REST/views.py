@@ -13,15 +13,17 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from REST.models import MyUser, Friend, Message, Group, Alert, BlockedUsers
-from REST.serializers import PasswordChangeSerializer, RegistrationSerializer, PersonSerializer, ShowFriendSerializer, \
-    UpdateFriendSerializer, MessageSerializer, UpdateMessagesSerializer, UserWithDistanceSerializer, GroupSerializer, \
+from REST.models import MyUser, Message, Group, Alert, BlockedUsers
+from REST.serializers import PasswordChangeSerializer, RegistrationSerializer, PersonSerializer, \
+    MessageSerializer, UpdateMessagesSerializer, UserWithDistanceSerializer, GroupSerializer, \
     GroupDetailSerializer, AlertSerializer, AlertSerializerSave, BlockedUsersSerializer, BlockedUsersListSerializer
 from REST.utils import get_tokens_for_user
 
 from testChatREST import settings
 
 from django.utils.translation import gettext as _
+
+from django.core.exceptions import PermissionDenied
 
 
 class RegistrationView(APIView):
@@ -121,42 +123,6 @@ class PersonInfo(APIView):
     def is_blocked(self, user_id, blocked_user_id):
         """Zwraca True jeżeli user_id jest zablokowany przez blocked_user_id """
         return BlockedUsers.objects.filter(user_id=blocked_user_id, blocked_user_id=user_id).exists()
-
-
-class FriendList(APIView):
-    """
-    List all friend, or add a new friend.
-    """
-
-    def delete(self, request, *args, **kwargs):
-        try:
-            person = request.data['person']
-            friend = request.data['friend']
-            friend_obj = Friend.objects.get(person=person, friend=friend)
-            friend_obj.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        except:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-
-    def get(self, request, person_id):
-        try:
-            person = MyUser.objects.get(pk=person_id)
-            friend = Friend.objects.filter(person=person)
-        except MyUser.DoesNotExist:
-            return Response(status=404)
-
-        serializer = ShowFriendSerializer(friend, many=True)
-        return Response(serializer.data)
-
-    def post(self, request, format=None):
-        serializer = UpdateFriendSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-from django.core.exceptions import PermissionDenied
 
 
 class MessageListCreateView(APIView):

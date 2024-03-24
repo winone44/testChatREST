@@ -79,11 +79,6 @@ class MyUser(AbstractBaseUser):
         return self.email
 
 
-class Friend(models.Model):
-    person = models.ForeignKey(MyUser, on_delete=models.DO_NOTHING, related_name='person')
-    friend = models.ForeignKey(MyUser, on_delete=models.DO_NOTHING, related_name='person_friends')
-
-
 class Message(models.Model):
     sender = models.ForeignKey(MyUser, on_delete=models.CASCADE, related_name='sent_messages')
     receiver = models.ForeignKey(MyUser, on_delete=models.CASCADE, related_name='received_messages')

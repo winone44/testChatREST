@@ -1,7 +1,7 @@
 from django.urls import path
 from rest_framework_simplejwt import views as jwt_views
 
-from REST.views import LoginView, LogoutView, ChangePasswordView, RegistrationView, FriendList, PersonList, PersonInfo, \
+from REST.views import LoginView, LogoutView, ChangePasswordView, RegistrationView, PersonList, PersonInfo, \
     MessageListCreateView, calculate_distance, list_users_with_distance, UsersInGroup, check_user_activity, \
     GroupCreateView, JoinGroupView, LeaveGroupView, GroupDetailView, list_users_by_recent_message, \
     DeleteCurrentUserView, AlertListCreateView, BlockedUsersListView, UserAlertsListDeleteView
@@ -12,8 +12,6 @@ urlpatterns = [
     path('accounts/logout', LogoutView.as_view(), name='register'),
     path('accounts/change-password', ChangePasswordView.as_view(), name='register'),
     path('accounts/token-refresh/', jwt_views.TokenRefreshView.as_view(), name='token_refresh'),
-    path('accounts/friend/', FriendList.as_view(), name='friend'),
-    path('accounts/friend/<int:person_id>/', FriendList.as_view(), name='friend-list'),
     path('accounts/blocked-user/', BlockedUsersListView.as_view(), name='blocked-users'),
     path('accounts/person/', PersonList.as_view(), name='person-list'),
     path('accounts/person/<int:person_id>/', PersonInfo.as_view(), name='person-info'),

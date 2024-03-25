@@ -85,13 +85,6 @@ class DeleteCurrentUserView(APIView):
         return Response({"message": _("The user was successfully deleted")}, status=status.HTTP_200_OK)
 
 
-class PersonList(APIView):
-    def get(self, request):
-        person = MyUser.objects.all()
-        serializer = PersonSerializer(person, many=True)
-        return Response(serializer.data)
-
-
 class PersonInfo(APIView):
     def get(self, request, person_id):
         try:
@@ -156,23 +149,6 @@ class MessageListCreateView(APIView):
     def is_blocked(self, user_id, blocked_user_id):
         """Zwraca True jeżeli user_id jest zablokowany przez blocked_user_id """
         return BlockedUsers.objects.filter(user_id=blocked_user_id, blocked_user_id=user_id).exists()
-
-
-def calculate_distance(request, user1_id, user2_id):
-    user1 = get_object_or_404(MyUser, id=user1_id)
-    user2 = get_object_or_404(MyUser, id=user2_id)
-
-    # Konwersja na radiany
-    lat1, lon1, lat2, lon2 = map(radians, [user1.latitude, user1.longitude, user2.latitude, user2.longitude])
-
-    # Obliczenie odległości używając wzoru haversine
-    dlon = lon2 - lon1
-    dlat = lat2 - lat1
-    a = sin(dlat / 2) ** 2 + cos(lat1) * cos(lat2) * sin(dlon / 2) ** 2
-    c = 2 * atan2(sqrt(a), sqrt(1 - a))
-    distance = 6371 * c * 1000  # Odległość w metrach
-
-    return JsonResponse({'distance': distance})
 
 
 def haversine_distance(lat1, lon1, lat2, lon2):
@@ -272,18 +248,6 @@ class UsersInGroup(APIView):
         users = group.users.all()
         serializer = PersonSerializer(users, many=True)
         return Response(serializer.data)
-
-
-@api_view(['GET'])
-def check_user_activity(request, user_id):
-    try:
-        user = MyUser.objects.get(pk=user_id)
-        if timezone.now() - user.last_activity > timedelta(minutes=1):
-            return Response({'status': 'Nieaktywny'}, status=status.HTTP_200_OK)
-        else:
-            return Response({'status': 'Aktywny'}, status=status.HTTP_200_OK)
-    except MyUser.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
 
 
 class GroupCreateView(APIView):

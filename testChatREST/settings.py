@@ -96,10 +96,10 @@ WSGI_APPLICATION = 'testChatREST.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'chatDB',
-        'USER': 'root',
-        'PASSWORD': 'student',
-        'HOST': 'localhost',
+        'NAME': 'nexusbackend$chatDB',
+        'USER': 'nexusbackend',
+        'PASSWORD': 'sdV!D3e4@safDF2',
+        'HOST': 'nexusbackend.mysql.pythonanywhere-services.com',
         'PORT': '3306',
     }
 }
